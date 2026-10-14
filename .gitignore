@@ -51,3 +51,6 @@ app.*.map.json
 /android/key.properties
 **/*.jks
 **/*.keystore
+
+# Documento di passaggio di consegne, locale
+HANDOFF.md

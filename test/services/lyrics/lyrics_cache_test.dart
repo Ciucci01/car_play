@@ -85,11 +85,18 @@ void main() {
   test('non conta i file non-.json verso il tetto', () async {
     final small = LyricsCache(directory, maxEntries: 1);
 
-    // Scrivi un file .json e un file non-.json
     await small.writeFound('track1', _lyrics);
+    // La data si fissa, come nel test sopra, e per lo stesso motivo:
+    // lastModified ha granularita' al millisecondo e due scritture di fila ci
+    // finiscono dentro insieme. A parita' di data l'ordine lo decide
+    // listSync, cioe' il filesystem e non la creazione, e lo sfratto portava
+    // via track2 invece di track1 una volta ogni qualche centinaio di corse.
+    File(
+      '${directory.path}/track1.json',
+    ).setLastModifiedSync(DateTime.now().subtract(const Duration(hours: 1)));
     File('${directory.path}/stray.txt').writeAsStringSync('junk');
 
-    // Scrivi un secondo file .json: dovrebbe sfrattare track1 ma non stray.txt
+    // Il secondo .json deve sfrattare track1, non stray.txt.
     await small.writeFound('track2', _lyrics);
 
     expect(await small.read('track1'), isNull);
